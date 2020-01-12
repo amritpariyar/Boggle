@@ -1,31 +1,325 @@
 ﻿@{
-    ViewBag.Title = "Home Page";
+    ViewBag.Title = "Boogle Word";
 }
+<style>
+    table#matrixTable {
+        border: 1px solid #000;
+        border-collapse: separate;
+    }
 
-<div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-    <p><a href="https://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
-</div>
+    #matrixTable > tbody > tr > td {
+        border: 1px solid #000;
+        padding: 10px 15px;
+    }
+
+    .mainCell {
+        background-color: #ffd800 !important;
+    }
+
+    .sideCell {
+        background-color: #dcff83 !important;
+    }
+    .scorediv{min-height:200px;}
+    #resultTable{width:100%;}
+</style>
+
 
 <div class="row">
-    <div class="col-md-4">
-        <h2>Getting started</h2>
+    <div class="col-md-12" >
+        <div class="col-md-4">
+            <div class="row">
+                <button type="button" id="spinword">Rotate Word</button>
+                <button type="button" id="playgame">Start Game</button>
+                <table id="matrixTable">
+                    <tbody>
+                        <tr>
+                            <td class="cell" id="00" data-x="0" data-y="0">&nbsp;</td>
+                            <td class="cell" id="01" data-x="0" data-y="1">&nbsp;</td>
+                            <td class="cell" id="02" data-x="0" data-y="2">&nbsp;</td>
+                            <td class="cell" id="03" data-x="0" data-y="3">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td class="cell" id="10" data-x="1" data-y="0">&nbsp;</td>
+                            <td class="cell" id="11" data-x="1" data-y="1">&nbsp;</td>
+                            <td class="cell" id="12" data-x="1" data-y="2">&nbsp;</td>
+                            <td class="cell" id="13" data-x="1" data-y="3">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td class="cell" id="20" data-x="2" data-y="0">&nbsp;</td>
+                            <td class="cell" id="21" data-x="2" data-y="1">&nbsp;</td>
+                            <td class="cell" id="22" data-x="2" data-y="2">&nbsp;</td>
+                            <td class="cell" id="23" data-x="2" data-y="3">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td class="cell" id="30" data-x="3" data-y="0">&nbsp;</td>
+                            <td class="cell" id="31" data-x="3" data-y="1">&nbsp;</td>
+                            <td class="cell" id="32" data-x="3" data-y="2">&nbsp;</td>
+                            <td class="cell" id="33" data-x="3" data-y="3">&nbsp;</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="row">
+                Ends In: <label id="timer"></label>
+            </div>
+            <div class="row">
+                <label for="wordtyped">Word</label>
+                <input type="text" id="wordtyped" name="wordtyped" class="text-uppercase" />
+                <button type="button" id="add" name="add">Add</button>
+                <button type="button" id="submit" name="submit">Submit</button>
+                <label id="info"></label>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="row scorediv">
+                <table id="resultTable">
+                    <thead>
+                        <tr>
+                            <th>Word</th>
+                            <th>Point</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    @*<tfoot>
+                        <tr>
+                            <td>Total Score:</td>
+                            <td id="totalscore"></td>
+                        </tr>
+                    </tfoot>*@
+                </table>
+            </div>
+            <label>Total Score:</label>
+            <label id="totalscore"></label>
+        </div>
+    </div>
+    
+    <div class="col-md-12">
+        <hr />
+        <strong>General game description:</strong><a href="https://en.wikipedia.org/wiki/Boggle">https://en.wikipedia.org/wiki/Boggle</a>
         <p>
-            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-            enables a clean separation of concerns and gives you full control over markup
-            for enjoyable, agile development.
+            <strong>Description: </strong> The system could be able to validate words which are present on the board, diagonally, vertically or horizontally, and also validate them against some basic dictionary (doesn’t have to be exhaustive, you can use open API)
+            <ul>
+                <li>	When game starts, new 4x4 board is generated.</li>
+                <li>	User can type the words which they think they found.</li>
+                <li>	System does validation and adds valid words into a list.</li>
+                <li>	Systems keeps track of scores, the score is total number of characters in the word. –</li>
+                <li>	If word is invalid an error is displayed.</li>
+                <li>	When timer runs out user can no longer enter new words, but should see results.</li>
+            </ul>
         </p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
     </div>
 </div>
+
+@section scripts{
+    <script>
+        var coordHoveRange, // adjescent cells of hovered cell
+            coordClickedRange=[],
+            coordClickPath = [], // word clicked(choosed) path,
+            totalscore = 0, // score each
+            boardchars = [], // characters on board
+            tappedWord = [], // characters tapped or choosed
+            scoredWord = [],
+            timer,
+            timelimit=0; // each scored word
+        $('.cell').hover(
+            function () {
+                var $this = $(this);
+                $(this).addClass('mainCell');
+                var x = $this.data('x');
+                var y = $this.data('y');
+                coordHoveRange = [
+                    (x - 1).toString() + y,
+                    (x + 1).toString() + y,
+                    x + (y - 1).toString(),
+                    x + (y + 1).toString(),
+                    (x - 1).toString() + (y - 1).toString(),
+                    (x + 1).toString() + (y + 1).toString(),
+                    (x + 1).toString() + (y - 1).toString(),
+                    (x - 1).toString() + (y + 1).toString()
+                ]
+                for (var i = 0; i < coordHoveRange.length; i++) {
+                    $('#' + coordHoveRange[i]).addClass('sideCell');
+                }
+            },
+            function () {
+                var $this = $(this);
+                $this.removeClass('mainCell');
+                for (var i = 0; i < coordHoveRange.length; i++) {
+                    $('#' + coordHoveRange[i]).removeClass('sideCell');
+                }
+            }
+        );
+
+        $('.cell').on('click', function () {
+            var cellid = $(this)[0].id;
+            var el = $('#wordtyped');
+            console.log(coordClickedRange);
+            var isValid = true;
+            var backindx = coordClickPath.findIndex(function (c) { return c == cellid });
+            var stepindx = coordClickedRange.length==0?0: coordClickedRange.findIndex(function (c) { return c == cellid });
+            //case of reverse click
+            if (backindx != -1 && (cellid == (coordClickPath[coordClickPath.length - 1]) || cellid == (coordClickPath[coordClickPath.length-2]))) isValid = false;
+            //case of click not in range
+            if (stepindx == -1) isValid = false;
+
+            if (!isValid) {
+                coordClickedRange = [];
+                coordClickPath = [];
+                el.val('');
+                showmessage("Invalid Move", "text-warning");
+                return;
+            }
+            el.val(el.val().trim() + $(this).text());
+            coordClickPath.push(cellid);
+            coordClickedRange = coordHoveRange;
+        })
+
+        //randomized chars in board
+        $('#spinword').on('click', function () {
+            totalscore = 0;
+            scoredWord = [];
+            coordClickPath = [];
+            $('#wordtyped').val('');
+            $.ajax({
+                url: '/Home/GetBoardData',
+                cache: false,
+                success: function (data) {
+                    boardchars = data;
+                    var td = $('.cell');
+                    $.each(data, function (i, v) {
+                        td[i].innerText = v;
+                    });
+                }, error: function (p, q, r) { }
+            })
+        })
+
+        var validateOnType = function (el) {
+            var isValid = true;
+            var word = $('#wordtyped').val().toUpperCase();
+            var wordArr = word.split('');
+            if (wordArr.length < 3) {
+                isValid = false;
+            } else {
+                var sidesOfChar = [];
+                var charpathindex = [];
+                for (var i = 0; i < wordArr.length; i++) {
+                    debugger;
+                    var checkchar = wordArr[i];
+                    var indexInBoard = boardchars.findIndex(function (char) { return char == checkchar; });
+                    if (indexInBoard == -1) { // if word is not in board
+                        return false;
+                    } else {
+                        if (i > 0) {
+                            var backindex = charpathindex.findIndex(function (c) { return c == indexInBoard });
+                            var stepindex = sidesOfChar.length == 0 ? 0 : sidesOfChar.findIndex(function (c) { return c == indexInBoard });
+                            if (backindex != -1 || stepindex==-1) return false;
+                        }
+                        sidesOfChar = [];
+                        sidesOfChar.push(indexInBoard + 1);
+                        sidesOfChar.push(indexInBoard - 1);
+                        sidesOfChar.push(indexInBoard + 3);
+                        sidesOfChar.push(indexInBoard - 3);
+                        sidesOfChar.push(indexInBoard + 4);
+                        sidesOfChar.push(indexInBoard - 4);
+                        sidesOfChar.push(indexInBoard + 5);
+                        sidesOfChar.push(indexInBoard - 5);
+                        charpathindex.push(indexInBoard);
+                    }
+                }
+            }
+            return isValid;
+        }
+
+        $('#wordtyped').on('keyup', function (el) {
+            if (el.keyCode == 13) {
+                if (validateOnType(el)){
+                    checkWord();
+                } else {
+                    $('#wordtyped').val();
+                    showmessage("Invalid selection.", "text-danger");
+                }
+            }
+        })
+        $('#add').on('click', function () { checkWord(); })
+        $('#submit').on('click', function () {
+            checkWord();
+            clearInterval()
+            document.getElementById('playgame').disabled=false;
+            //stop timer
+            //enable play
+        })
+        var checkWord = function () {
+            if (timelimit < 1) {
+                showmessage("Game is not started, Start it first.", "text-info");
+                return;
+            }
+            $('#info').text('').removeClass('text-success').removeClass('text-danger');
+            var wordcheck = $("#wordtyped").val(), wordcount = wordcheck.length;
+            if (wordcount < 3) {
+                showmessage("Invalid Word", "text-danger");
+                return;
+            }
+            if (scoredWord.findIndex(function (word) { return word == wordcheck }) > -1) {
+                showmessage("word already scored", "text-info");
+                return;
+            }
+
+            $.ajax({
+                url: 'https://googledictionaryapi.eu-gb.mybluemix.net/?define=' + + '&lang=en',
+                success: function (data) {
+                    if (data.length > 0) {
+                        scoredWord.push(wordcheck);
+                        var row = '<tr><td>' + wordcheck + '</td><td>' + wordcount + '</td></tr>';
+                        totalscore += wordcount;
+                        $('#resultTable>tbody').append(row);
+                        $('#totalscore').text(totalscore);
+                        $('#wordtyped').val('');
+                        $('#info').text("success").addClass("text-success");
+                        coordClickPath = [];
+                        coordClickedRange = [];
+                    }
+                }, error(p, q, r) {
+                    if (r == "Not Found") {
+                        $('#info').text("Invalid word").addClass("text-danger");
+                        $('#wordtyped').val('');
+                    }
+                }
+
+            })
+        }
+        var showmessage = function (msg, type) {
+            $('#info').text('').removeClass('text-success').removeClass('text-danger').removeClass('text-info').removeClass('text-warning');
+            $('#info').text(msg).addClass(type);
+        }
+
+        $('#playgame').on('click', function () {
+            //start intervel, disable play
+            var $this = $(this);
+            timelimit = 60;
+            showmessage('', '');
+            document.getElementById('submit').disabled = false;
+            document.getElementById('playgame').disabled = true;
+            $('#resultTable>tbody>tr').remove();
+            $('#spinword').trigger('click');
+            timer = setInterval(activateTimer, 1000);
+        })
+        var activateTimer = function () {
+            if (timelimit < 0) {
+                showmessage('Time out', 'text-danger');
+                document.getElementById('playgame').disabled = false;
+                stoptimer();
+            } else {
+                $('#timer').text(timelimit);                
+            }
+            timelimit--;
+        }
+        var stoptimer = function () {
+            if (timer != null) clearInterval(timer);
+            document.getElementById('submit').disabled = true;
+        }
+        $(document).ready(function () {
+            //$('#spinword').trigger('click');
+            document.getElementById('submit').disabled = true;
+        })
+    </script>
+}

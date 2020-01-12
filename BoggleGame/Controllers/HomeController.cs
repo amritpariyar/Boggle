@@ -13,9 +13,23 @@ namespace BoggleGame.Controllers
             return View();
         }
 
+        public JsonResult GetBoardData()
+        {
+            string charactes = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            List<char> charArray = charactes.ToCharArray().ToList();
+            List<char> data = new List<char>();
+            Random random = new Random();
+            for (int i = 0; i < 16; i++)
+            {
+                int index = random.Next(0, 25);
+                data.Add(charArray[index]);
+            }
+            return Json(data, JsonRequestBehavior.AllowGet);
+        }
+
         public ActionResult About()
         {
-            ViewBag.Message = "Your application description page.";
+            ViewBag.Message = "Boggle Game description.";
 
             return View();
         }
