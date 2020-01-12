@@ -307,6 +307,7 @@
             if (timelimit < 0) {
                 showmessage('Time out', 'text-danger');
                 document.getElementById('playgame').disabled = false;
+                document.getElementById('spinword').disabled = false;
                 stoptimer();
             } else {
                 $('#timer').text(timelimit);                
@@ -316,10 +317,12 @@
         var stoptimer = function () {
             if (timer != null) clearInterval(timer);
             document.getElementById('submit').disabled = true;
+            document.getElementById('spinword').disabled = true;
         }
         $(document).ready(function () {
             //$('#spinword').trigger('click');
             document.getElementById('submit').disabled = true;
+            document.getElementById('spinword').disabled = true;
         })
     </script>
 }
